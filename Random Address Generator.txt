@@ -1,0 +1,639 @@
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+<style>
+    /* User's existing styles are preserved */
+    :root {
+      --primary-color: #6c5ce7;
+      --primary-light: #a29bfe;
+      --secondary-color: #4834d4;
+      --accent-color: #686de0;
+      --accent-light: #e6e9ff;
+      --light-color: #f8f9fa;
+      --dark-color: #2d3436;
+      --text-color: #636e72;
+      --border-radius: 5px; 
+      --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); 
+      --transition: all 0.2s ease-in-out; 
+      --gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+    
+ 
+ 
+    .section-btn {
+      background: #2d72b9;
+      color: white;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-weight: 600;
+      padding: 8px 14px;
+      margin-left: 10px;
+      font-size: 14px;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .section-btn:hover {
+        background: #255f9a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .section-btn:active {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+    .section-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+      transition: var(--transition);
+    }
+    .section-btn:hover svg {
+      transform: rotate(15deg);
+    }
+
+    .section-header {
+      display: flex; 
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px; 
+      border-bottom: 1px solid #eee;
+      padding-bottom: 4px;
+      padding-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 1.2rem; 
+      font-weight: 700;
+      color: var(--secondary-color); 
+      display: flex;
+      align-items: center;
+      flex-grow: 1; 
+    }
+
+    .filter-container {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 25px; /* Added more space below filters */
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 15px;
+        border-radius: var(--border-radius);
+        border: 1px solid #ccc; 
+        background-color: white;
+        color: var(--dark-color);
+        transition: var(--transition);
+        flex: 1 1 auto;
+        min-width: 160px; 
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23636372' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        font-size: 0.95rem; 
+    }
+
+    .filter-select:focus, .filter-select:hover {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.2);
+    }
+
+    /* --- NEW STYLES for Profile Picture and QR Code --- */
+    .profile-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+    .person-image {
+        width: 170px;
+        height: 170px;
+        border-radius: 50%; 
+        box-shadow: 0 8px 22px rgba(0,0,0,0.1);
+        object-fit: cover;
+        background-color: white;
+    }
+    .qr-code-container { 
+        /* cursor: pointer; -- এই লাইনটি মুছে ফেলা হয়েছে */
+    }
+    .qr-code-container canvas {
+        width: 160px !important;
+        height: 160px !important;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        padding: 6px;
+        background: white;
+        box-shadow: var(--box-shadow);
+    }
+
+    /* --- Grid Styles for Generator Sections --- */
+    .generator-data-grid {
+        display: grid;
+        gap: 5px;  
+        grid-template-columns: 1fr;  
+        padding-bottom: 25px;
+    }
+    .generator-data-column { 
+        padding: 3px;
+        border-radius: 3px; 
+    }
+    .generator-data-item {
+        display: flex; 
+        align-items: baseline; 
+        gap: 10px; 
+        margin-bottom: 1px;
+        padding: 10px 0px; 
+    }
+    .generator-data-item:last-child {
+        border-bottom: none;
+    }
+    .generator-data-label {
+        font-weight: 600; 
+        white-space: nowrap; 
+        flex-shrink: 0; 
+        color: var(--dark-color);
+    }
+    .generator-data-label::after { 
+        content: ":";
+    }
+    .generator-data-value {  
+        word-break: break-word;
+        flex-grow: 1;  
+    }
+    .value-with-button {
+        display: flex;
+        align-items: center; 
+        flex-grow: 1;
+        gap: 5px;
+    }
+    .value-text {
+       word-break: break-all;
+    }
+    .bulk-gen-btn {
+        font-size: 11px;
+        padding: 3px 8px;
+        background-color: #e9e9f0;
+        color: #555;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        white-space: nowrap;
+        font-weight: 500;
+        transition: var(--transition);
+        flex-shrink: 0;
+    }
+    .bulk-gen-btn:hover {
+        background-color: #dcdce6;
+        border-color: #aaa;
+        color: #222;
+    }
+  
+    /* --- Responsive and other styles --- */
+    @media (min-width: 768px) { 
+        .generator-data-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px 25px; /* Add column gap */
+        }
+    }
+    @media (max-width: 600px) {
+        .profile-header { 
+            gap: 25px;
+        }
+        .section-header {
+            align-items: flex-start;
+        }
+        .section-btn {
+            width: 100%;
+            justify-content: center;
+            margin-left: 0;
+            margin-top: 10px;
+        }
+    }
+</style>
+ 
+<div class="main-container">
+
+    <!-- ====== Person Generator Section ====== -->
+    <div class="generator-container">
+        <!-- Filter Options -->
+        <div class="section filter-section">
+            <div class="filter-container">
+                <select id="genderFilter" class="filter-select" onchange="applyFilters()">
+                    <option value="" />Any Gender
+                    <option value="male" />Male
+                    <option value="female" />Female
+                </select>
+                <!-- NEW Age Filter -->
+                <select id="ageFilter" class="filter-select" onchange="applyFilters()">
+                    <option value="" />Any Age (18-75)
+                    <option value="18-25" />18-25 years
+                    <option value="26-40" />26-40 years
+                    <option value="41-60" />41-60 years
+                    <option value="61-75" />61-75 years
+                </select>
+                <select id="locationFilter" class="filter-select" onchange="handleLocationRedirect()">
+                    <option value="" />United States
+                     <option value="your-link-for-australia" />Australia
+                    <option value=" " />Austria
+                    <option value="your-link-for-belgium" />Belgium
+                    <option value="your-link-for-brazil" />Brazil
+                    <option value=" " />Canada
+                    <option value=" " />Cyprus (Anglicized)
+                    <option value="your-link-for-cyprus-greek" />Cyprus (Greek)
+                    <option value=" " />Czech Republic
+                    <option value=" " />Denmark
+                    <option value=" " />Estonia
+                    <option value="your-link-for-finland" />Finland
+                    <option value="your-link-for-france" />France
+                    <option value="your-link-for-germany" />Germany
+                    <option value="your-link-for-greece" />Greece
+                    <option value="your-link-for-greenland" />Greenland
+                    <option value="your-link-for-hungary" />Hungary
+                    <option value="your-link-for-iceland" />Iceland
+                    <option value="your-link-for-ireland" />Ireland
+                    <option value="your-link-for-israel" />Israel
+                    <option value="your-link-for-italy" />Italy
+                    <option value="your-link-for-japan" />Japan
+                    <option value="your-link-for-luxembourg" />Luxembourg
+                    <option value="your-link-for-malta" />Malta
+                    <option value="your-link-for-netherlands" />Netherlands
+                    <option value="your-link-for-new-zealand" />New Zealand
+                    <option value="your-link-for-norway" />Norway
+                    <option value="your-link-for-poland" />Poland
+                    <option value="your-link-for-portugal" />Portugal
+                    <option value="your-link-for-singapore" />Singapore
+                    <option value="your-link-for-slovakia" />Slovakia
+                    <option value="your-link-for-slovenia" />Slovenia
+                    <option value="your-link-for-south-africa" />South Africa
+                    <option value="your-link-for-south-korea" />South Korea
+                    <option value="your-link-for-spain" />Spain
+                    <option value="your-link-for-sweden" />Sweden
+                    <option value="your-link-for-switzerland" />Switzerland
+                    <option value="your-link-for-tunisia" />Tunisia
+                    <option value="your-link-for-united-arab-emirates" />United Arab Emirates
+                    <option value="your-link-for-united-kingdom" />United Kingdom
+                    <option value="https://www.nameaddress.org/2025/06/american-name-generator.html" />United States
+                    <option value="your-link-for-uruguay" />Uruguay
+                </select>
+            </div>
+        </div>
+
+        <!-- NEW Profile Header with Picture and QR Code -->
+        <div class="profile-header">
+            <img src="" alt="Generated Person" id="personImage" class="person-image" />
+            <div class="qr-code-container" id="qrCodeContainer"></div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Generated Fake Person</h2>
+                <button class="section-btn" onclick="generateSection('personal')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg>
+                Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="personalInfoGrid"></div>
+        </div>
+
+        <!-- Address Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Address Information</h2>
+                <button class="section-btn" onclick="generateSection('address')"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg> Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="addressInfoGrid"></div>
+        </div>
+
+        <!-- Financial Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Financial Information</h2>
+                <button class="section-btn" onclick="generateSection('finance')"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg> Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="financeInfoGrid"></div>
+        </div>
+
+        <!-- Internet Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Internet Information</h2>
+                <button class="section-btn" onclick="generateSection('internet')"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg> Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="internetInfoGrid"></div>
+        </div>
+        
+        <!-- *** NEW: Cryptocurrency Information Section *** -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Cryptocurrency Information</h2>
+                <button class="section-btn" onclick="generateSection('crypto')"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg> Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="cryptoInfoGrid"></div>
+        </div>
+
+        <!-- Employment Information Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Employment Details</h2>
+                <button class="section-btn" onclick="generateSection('employment')"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg> Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="employmentInfoGrid"></div>
+        </div>
+        
+        <!-- *** NEW: Other Information Section *** -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Other Information</h2>
+                <button class="section-btn" onclick="generateSection('other')"><svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 399 512.34" aria-hidden="true" focusable="false"><path fill-rule="nonzero" d="m0 84.87.03-.01c0-4.73 3.84-8.57 8.58-8.57h223.02V8.59c.02-1.96.69-3.94 2.05-5.55 3.06-3.62 8.48-4.07 12.1-1.01l150.06 127.4c.4.33.77.69 1.11 1.1 3.06 3.62 2.61 9.04-1.01 12.1L246.21 269.75a8.584 8.584 0 0 1-5.97 2.41 8.61 8.61 0 0 1-8.61-8.61v-67.67H119.62v32.96c-.03 2.42-1.04 4.83-3.03 6.52L14.65 322.62a8.543 8.543 0 0 1-6.04 2.48c-4.75 0-8.61-3.85-8.61-8.6V84.87zm399 342.6-.03.01c0 4.73-3.84 8.57-8.58 8.57H167.37v67.71a8.696 8.696 0 0 1-2.05 5.54c-3.06 3.62-8.48 4.07 12.1-1.01L3.16 382.91c-.4-.33-.77-.69-1.11-1.09-3.06-3.62-2.61-9.05 1.01-12.11L152.79 242.6a8.584 8.584 0 0 1 5.97-2.41c4.75 0 8.61 3.85 8.61 8.6v67.67h112.01V283.5a8.703 8.703 0 0 1 3.03-6.52l101.94-87.26a8.604 8.604 0 0 1 6.04-2.48 8.61 8.61 0 0 1 8.61 8.61v231.62zm-17.21-8.57V214.52l-85.2 72.91v37.64a8.6 8.6 0 0 1-8.6 8.6H158.76a8.6 8.6 0 0 1-8.6-8.6v-57.7L21.88 376.27l128.28 108.91v-57.71a8.6 8.6 0 0 1 8.6-8.6l223.03.03zM17.21 93.44v204.39l85.2-72.92v-37.63c0-4.76 3.85-8.61 8.6-8.61h129.23a8.61 8.61 0 0 1 8.61 8.61v57.7l128.27-108.91L248.85 27.16v57.71c0 4.75-3.86 8.6-8.61 8.6l-223.03-.03z" fill="currentColor"/></path></svg> Generate New</button>
+            </div>
+            <div class="generator-data-grid" id="otherInfoGrid"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// --- Data Arrays (Large lists for variety) ---
+const maleFirstNames = ["Liam", "Noah", "Oliver", "Elijah", "James", "William", "Benjamin", "Lucas", "Henry", "Theodore", "Jack", "Levi", "Alexander", "Jackson", "Mateo", "Daniel", "Michael", "Mason", "Sebastian", "Ethan", "Logan", "Owen", "Samuel", "Jacob", "Asher", "Aiden", "John", "Joseph", "Wyatt", "David", "Leo", "Luke", "Julian", "Hudson", "Grayson", "Matthew", "Ezra", "Gabriel", "Carter", "Isaac", "Jayden", "Luca", "Anthony", "Dylan", "Lincoln", "Thomas", "Maverick", "Elias", "Josiah", "Charles", "Caleb", "Christopher", "Ezekiel", "Miles", "Jaxon", "Isaiah", "Andrew", "Joshua", "Nathan", "Nolan", "Adrian", "Cameron", "Santiago", "Eli", "Aaron", "Ryan", "Angel", "Cooper", "Waylon", "Easton", "Kai", "Christian", "Landon", "Colton", "Roman", "Axel", "Brooks", "Jonathan", "Robert", "Jameson", "Ian", "Everett", "Greyson", "Wesley", "Jeremiah", "Hunter", "Leonardo", "Jordan", "Jose", "Bennett", "Silas", "Nicholas", "Parker", "Beau", "Weston", "Austin", "Connor", "Carson", "Dominic", "Xavier", "Adam", "Arthur", "Declan", "Evan", "Ezequiel", "Gael", "Ivan", "Javier", "Joel", "Kingston", "Luis", "Milo", "Oscar", "Rhett", "Rowan", "Ryker", "Thiago", "Vincent"];
+const femaleFirstNames = ["Olivia", "Emma", "Charlotte", "Amelia", "Ava", "Sophia", "Isabella", "Mia", "Evelyn", "Harper", "Luna", "Camila", "Gianna", "Elizabeth", "Eleanor", "Ella", "Abigail", "Sofia", "Avery", "Scarlett", "Emily", "Aria", "Penelope", "Chloe", "Layla", "Mila", "Nora", "Hazel", "Madison", "Ellie", "Lily", "Nova", "Isla", "Grace", "Violet", "Aurora", "Riley", "Zoey", "Willow", "Emilia", "Stella", "Zoe", "Victoria", "Hannah", "Addison", "Leah", "Lucy", "Eliana", "Ivy", "Everly", "Lillian", "Paisley", "Elena", "Naomi", "Maya", "Natalie", "Kinsley", "Delilah", "Claire", "Audrey", "Aaliyah", "Ruby", "Brooklyn", "Alice", "Aubrey", "Autumn", "Leilani", "Savannah", "Valentina", "Kennedy", "Madelyn", "Josephine", "Bella", "Skylar", "Genesis", "Sophie", "Hailey", "Sadie", "Natalia", "Quinn", "Caroline", "Allison", "Gabriella", "Anna", "Serenity", "Nevaeh", "Cora", "Ariana", "Emery", "Lydia", "Jade", "Sarah", "Eva", "Adeline", "Madeline", "Piper", "Rylee", "Clara", "Vivian", "Melody", "Adalynn", "Alaina", "Alina", "Amara", "Amira", "Andrea", "Angelina", "Athena", "Bailey", "Daisy", "Daniela", "Destiny", "Eliza", "Faith", "Fatima", "Genevieve", "Georgia", "Giselle", "Hope", "Iris", "Isabelle", "Jasmine", "Jocelyn", "Juliana", "Juliette", "Katherine", "Kayla", "Kendall", "Kimberly", "Kylie", "Laila", "Lauren", "Liliana", "London", "Lucia", "Mackenzie", "Margaret", "Maria", "Mariah", "Mary", "Melanie", "Morgan", "Mya", "Paige", "Payton", "Phoebe", "Rachel", "Raelynn", "Reagan", "Rose", "Rosemary", "Sage", "Samantha", "Sara", "Sienna", "Summer", "Taylor", "Teagan", "Tessa", "Thea", "Trinity", "Valeria", "Valerie", "Vanessa", "Veronica", "Ximena"];
+const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Gomez", "Phillips", "Evans", "Turner", "Diaz", "Parker", "Cruz", "Edwards", "Collins", "Reyes", "Stewart", "Morris", "Morales", "Murphy", "Cook", "Rogers", "Gutierrez", "Ortiz", "Morgan", "Cooper", "Peterson", "Bailey", "Reed", "Kelly", "Howard", "Ramos", "Kim", "Cox", "Ward", "Richardson", "Watson", "Brooks", "Chavez", "Wood", "James", "Bennett", "Gray", "Mendoza", "Ruiz", "Hughes", "Price", "Alvarez", "Castillo", "Sanders", "Patel", "Myers", "Long", "Ross", "Foster", "Jimenez", "Powell", "Jenkins", "Perry", "Russell", "Sullivan", "Bell", "Ford", "Hamilton", "Graham", "Wallace", "Warren", "West", "Cole", "Hayes", "Bryant", "Harrison", "Alexander", "Gibson", "Mcdonald", "Marshall", "Snyder", "Hart"];
+const genders = ['male', 'female'];
+const zodiacSigns = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+const hairColors = ['Black', 'Brown', 'Blonde', 'Red', 'Gray', 'Chestnut', 'Auburn', 'Dirty Blonde'];
+const eyeColors = ['Brown', 'Blue', 'Green', 'Hazel', 'Amber', 'Gray', 'Black'];
+const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+const educationLevels = ["High School Diploma", "GED", "Some College", "Associate Degree", "Bachelor's Degree", "Master's Degree", "Doctorate (PhD)", "Professional Degree (MD, JD)"];
+const maritalStatuses = ["Single", "Married", "Divorced", "Widowed", "In a relationship"];
+const hobbies = ["Reading books", "Traveling and exploring", "Cooking new recipes", "Playing video games", "Hiking and camping", "Photography", "Gardening", "Painting and drawing", "Playing a musical instrument", "Watching movies", "Fitness and gym", "Learning new languages"];
+const universities = ["Harvard University", "Stanford University", "MIT", "Caltech", "University of California, Berkeley", "Yale University", "Columbia University", "Princeton University", "University of Chicago", "Johns Hopkins University", "University of Pennsylvania", "Cornell University", "Duke University", "Northwestern University"];
+const streetNames = ["Main", "Oak", "Pine", "Maple", "Cedar", "Elm", "Washington", "Lincoln", "Jefferson", "Lake", "Park", "Hill", "Adams", "Sunset", "River", "Willow", "Forest", "Spring", "Highland", "Chestnut", "Walnut", "Broad", "Church", "School"];
+const streetSuffixes = ["St", "Ave", "Blvd", "Dr", "Rd", "Ln", "Way", "Cir", "Ct", "Pl", "Ter", "Pkwy", "Sq", "Aly"];
+const usStatesData = { "AL": { name: "Alabama", cities: ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa"], timezone: "CST", areaCodes: ["205", "251", "256", "334", "938"] }, "AK": { name: "Alaska", cities: ["Anchorage", "Fairbanks", "Juneau", "Sitka", "Ketchikan"], timezone: "AKST", areaCodes: ["907"] }, "AZ": { name: "Arizona", cities: ["Phoenix", "Tucson", "Mesa", "Chandler", "Scottsdale", "Glendale"], timezone: "MST", areaCodes: ["480", "520", "602", "623", "928"] }, "AR": { name: "Arkansas", cities: ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro"], timezone: "CST", areaCodes: ["479", "501", "870"] }, "CA": { name: "California", cities: ["Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno", "Sacramento", "Long Beach", "Oakland"], timezone: "PST", areaCodes: ["209", "213", "310", "323", "408", "415", "510", "530", "559", "562", "619", "626", "650", "661", "707", "714", "747", "760", "805", "818", "831", "858", "909", "916", "925", "949", "951"] }, "CO": { name: "Colorado", cities: ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Lakewood", "Thornton"], timezone: "MST", areaCodes: ["303", "719", "720", "970"] }, "CT": { name: "Connecticut", cities: ["Bridgeport", "New Haven", "Stamford", "Hartford", "Waterbury", "Norwalk"], timezone: "EST", areaCodes: ["203", "475", "860", "959"] }, "DE": { name: "Delaware", cities: ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna"], timezone: "EST", areaCodes: ["302"] }, "FL": { name: "Florida", cities: ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg", "Hialeah", "Fort Lauderdale", "Tallahassee"], timezone: "EST", areaCodes: ["239", "305", "321", "352", "386", "407", "561", "727", "754", "772", "786", "813", "850", "863", "904", "941", "954"] }, "GA": { name: "Georgia", cities: ["Atlanta", "Augusta", "Columbus", "Macon", "Savannah", "Athens"], timezone: "EST", areaCodes: ["229", "404", "470", "478", "678", "706", "762", "770", "912"] }, "HI": { name: "Hawaii", cities: ["Honolulu", "Pearl City", "Hilo", "Kailua", "Waipahu"], timezone: "HST", areaCodes: ["808"] }, "ID": { name: "Idaho", cities: ["Boise", "Meridian", "Nampa", "Idaho Falls", "Pocatello"], timezone: "MST", areaCodes: ["208", "986"] }, "IL": { name: "Illinois", cities: ["Chicago", "Aurora", "Joliet", "Naperville", "Rockford", "Springfield", "Peoria"], timezone: "CST", areaCodes: ["217", "224", "309", "312", "331", "618", "630", "708", "773", "779", "815", "847", "872"] }, "IN": { name: "Indiana", cities: ["Indianapolis", "Fort Wayne", "Evansville", "South Bend", "Carmel", "Fishers"], timezone: "EST", areaCodes: ["219", "260", "317", "463", "574", "765", "812", "930"] }, "IA": { name: "Iowa", cities: ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City"], timezone: "CST", areaCodes: ["319", "515", "563", "641", "712"] }, "KS": { name: "Kansas", cities: ["Wichita", "Overland Park", "Kansas City", "Topeka", "Olathe", "Lawrence"], timezone: "CST", areaCodes: ["316", "620", "785", "913"] }, "KY": { name: "Kentucky", cities: ["Louisville", "Lexington", "Bowling Green", "Owensboro", "Covington"], timezone: "EST", areaCodes: ["270", "364", "502", "606", "859"] }, "LA": { name: "Louisiana", cities: ["New Orleans", "Baton Rouge", "Shreveport", "Lafayette", "Lake Charles"], timezone: "CST", areaCodes: ["225", "318", "337", "504", "985"] }, "ME": { name: "Maine", cities: ["Portland", "Lewiston", "Bangor", "South Portland", "Auburn"], timezone: "EST", areaCodes: ["207"] }, "MD": { name: "Maryland", cities: ["Baltimore", "Columbia", "Germantown", "Silver Spring", "Waldorf", "Frederick"], timezone: "EST", areaCodes: ["240", "301", "410", "443", "667"] }, "MA": { name: "Massachusetts", cities: ["Boston", "Worcester", "Springfield", "Cambridge", "Lowell", "Brockton"], timezone: "EST", areaCodes: ["339", "351", "413", "508", "617", "774", "781", "857", "978"] }, "MI": { name: "Michigan", cities: ["Detroit", "Grand Rapids", "Warren", "Sterling Heights", "Ann Arbor", "Lansing"], timezone: "EST", areaCodes: ["231", "248", "269", "313", "517", "586", "616", "734", "810", "906", "947", "989"] }, "MN": { name: "Minnesota", cities: ["Minneapolis", "Saint Paul", "Rochester", "Duluth", "Bloomington", "Brooklyn Park"], timezone: "CST", areaCodes: ["218", "320", "507", "612", "651", "763", "952"] }, "MS": { name: "Mississippi", cities: ["Jackson", "Gulfport", "Southaven", "Hattiesburg", "Biloxi"], timezone: "CST", areaCodes: ["228", "601", "662", "769"] }, "MO": { name: "Missouri", cities: ["Kansas City", "Saint Louis", "Springfield", "Columbia", "Independence", "Lee's Summit"], timezone: "CST", areaCodes: ["314", "417", "573", "636", "660", "816"] }, "MT": { name: "Montana", cities: ["Billings", "Missoula", "Great Falls", "Bozeman", "Butte"], timezone: "MST", areaCodes: ["406"] }, "NE": { name: "Nebraska", cities: ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney"], timezone: "CST", areaCodes: ["308", "402", "531"] }, "NV": { name: "Nevada", cities: ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks"], timezone: "PST", areaCodes: ["702", "725", "775"] }, "NH": { name: "New Hampshire", cities: ["Manchester", "Nashua", "Concord", "Dover", "Rochester"], timezone: "EST", areaCodes: ["603"] }, "NJ": { name: "New Jersey", cities: ["Newark", "Jersey City", "Paterson", "Elizabeth", "Lakewood", "Edison"], timezone: "EST", areaCodes: ["201", "551", "609", "640", "732", "848", "856", "862", "908", "973"] }, "NM": { name: "New Mexico", cities: ["Albuquerque", "Las Cruces", "Rio Rancho", "Santa Fe", "Roswell"], timezone: "MST", areaCodes: ["505", "575"] }, "NY": { name: "New York", cities: ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse", "Albany", "New Rochelle"], timezone: "EST", areaCodes: ["212", "315", "332", "347", "516", "518", "585", "607", "631", "646", "680", "716", "718", "838", "845", "914", "917", "929", "934"] }, "NC": { name: "North Carolina", cities: ["Charlotte", "Raleigh", "Greensboro", "Durham", "Winston-Salem", "Fayetteville"], timezone: "EST", areaCodes: ["252", "336", "704", "743", "828", "910", "919", "980", "984"] }, "ND": { name: "North Dakota", cities: ["Fargo", "Bismarck", "Grand Forks", "Minot", "West Fargo"], timezone: "CST", areaCodes: ["701"] }, "OH": { name: "Ohio", cities: ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron", "Dayton"], timezone: "EST", areaCodes: ["216", "220", "234", "326", "330", "380", "419", "440", "513", "567", "614", "740", "937"] }, "OK": { name: "Oklahoma", cities: ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Lawton"], timezone: "CST", areaCodes: ["405", "539", "580", "918"] }, "OR": { name: "Oregon", cities: ["Portland", "Salem", "Eugene", "Gresham", "Hillsboro", "Beaverton"], timezone: "PST", areaCodes: ["458", "503", "541", "971"] }, "PA": { name: "Pennsylvania", cities: ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading", "Scranton"], timezone: "EST", areaCodes: ["215", "223", "267", "272", "412", "484", "570", "582", "610", "717", "724", "814", "878"] }, "RI": { name: "Rhode Island", cities: ["Providence", "Warwick", "Cranston", "Pawtucket", "East Providence"], timezone: "EST", areaCodes: ["401"] }, "SC": { name: "South Carolina", cities: ["Charleston", "Columbia", "North Charleston", "Mount Pleasant", "Rock Hill"], timezone: "EST", areaCodes: ["803", "839", "843", "854", "864"] }, "SD": { name: "South Dakota", cities: ["Sioux Falls", "Rapid City", "Aberdeen", "Brookings", "Watertown"], timezone: "CST", areaCodes: ["605"] }, "TN": { name: "Tennessee", cities: ["Nashville", "Memphis", "Knoxville", "Chattanooga", "Clarksville", "Murfreesboro"], timezone: "CST", areaCodes: ["423", "615", "629", "731", "865", "901", "931"] }, "TX": { name: "Texas", cities: ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso", "Arlington", "Corpus Christi"], timezone: "CST", areaCodes: ["210", "214", "254", "281", "325", "346", "361", "409", "430", "432", "469", "512", "682", "713", "726", "737", "806", "817", "830", "832", "903", "915", "936", "940", "956", "972", "979"] }, "UT": { name: "Utah", cities: ["Salt Lake City", "West Valley City", "Provo", "West Jordan", "Orem"], timezone: "MST", areaCodes: ["385", "435", "801"] }, "VT": { name: "Vermont", cities: ["Burlington", "South Burlington", "Rutland", "Essex Junction", "Barre"], timezone: "EST", areaCodes: ["802"] }, "VA": { name: "Virginia", cities: ["Virginia Beach", "Norfolk", "Chesapeake", "Richmond", "Newport News", "Alexandria"], timezone: "EST", areaCodes: ["276", "434", "540", "571", "703", "757", "804"] }, "WA": { name: "Washington", cities: ["Seattle", "Spokane", "Tacoma", "Vancouver", "Bellevue", "Kent"], timezone: "PST", areaCodes: ["206", "253", "360", "425", "509", "564"] }, "WV": { name: "West Virginia", cities: ["Charleston", "Huntington", "Morgantown", "Parkersburg", "Wheeling"], timezone: "EST", areaCodes: ["304", "681"] }, "WI": { name: "Wisconsin", cities: ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine"], timezone: "CST", areaCodes: ["262", "414", "534", "608", "715", "920"] }, "WY": { name: "Wyoming", cities: ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs"], timezone: "MST", areaCodes: ["307"] } };
+const usStateAbbreviations = Object.keys(usStatesData);
+const banks = ["Chase", "Bank of America", "Wells Fargo", "Citibank", "U.S. Bank", "PNC Bank", "TD Bank", "Capital One", "Ally Bank", "Discover Bank"];
+const creditCardTypes = ["Visa", "MasterCard", "American Express", "Discover", "Capital One", "Chase Sapphire"];
+const jobTitles = ["Software Engineer", "Marketing Manager", "Accountant", "Nurse", "Teacher", "Sales Representative", "Project Manager", "Graphic Designer", "Data Analyst", "HR Specialist", "Operations Manager", "Customer Service Rep", "Web Developer", "Financial Analyst", "Mechanical Engineer"];
+const industries = ["Technology", "Healthcare", "Finance", "Education", "Retail", "Manufacturing", "Construction", "Hospitality", "Real Estate", "Logistics", "Government", "Non-profit", "Consulting", "Media", "Automotive"];
+const employmentStatuses = ["Full-time", "Part-time", "Contractor", "Self-employed", "Intern"];
+const companySizes = ["1-10 employees", "11-50 employees", "51-200 employees", "201-500 employees", "501-1000 employees", "1001-5000 employees", "5001+ employees"];
+const emailDomains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com", "aol.com", "protonmail.com", "zoho.com", "mail.com"];
+const userAgents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36","Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1", "Mozilla/5.0 (Linux; Android 11; SM-G991U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Mobile Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0", "Mozilla/5.0 (iPad; CPU OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/91.0.4472.80 Mobile/15E148 Safari/604.1"];
+const colors = ["Blue", "Green", "Red", "Yellow", "Purple", "Black", "White", "Orange", "Pink", "Turquoise", "Maroon", "Cyan"];
+const vehicles = ["Ford F-150", "Toyota Camry", "Honda CR-V", "Tesla Model 3", "Jeep Wrangler", "Chevrolet Silverado", "Subaru Outback", "BMW 3 Series", "Toyota RAV4", "Honda Civic", "Porsche 911", "Ford Mustang"];
+const R_NUM = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+// --- Your static profile image URL ---
+const STATIC_PROFILE_IMAGE_URL = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhnlmSUic_Ezolgj6mi50nvZHfvu_iJfJNXAQP7Yx-LUKcIkOYpIGjqS7Nam1svjEJXyFOPdFbniKLaaoRB0zP9zbmiUGW2F9jwTTCU6YNUitwMa3aqTBmUxb4GRH1BJrJvlqXLLFfjHyyDUbXya-SiSk7EfK4O5lqlMEQjSV8_MDKDT5QjFq-GZE1brpQb/s416/Random_name-removebg-preview.png';
+
+// --- Global State ---
+let currentPerson = {};
+let usedNames = new Set();
+
+// --- Helper Functions ---
+function getRandomItem(arr) { if (!arr || arr.length === 0) return ''; return arr[Math.floor(Math.random() * arr.length)]; }
+function generateRandomChars(length, chars) { let result = ''; for (let i = 0; i < length; i++) { result += chars.charAt(Math.floor(Math.random() * chars.length)); } return result; }
+function generateRandomNumbers(length) { return generateRandomChars(length, '0123456789'); }
+function generateRandomAlphanum(length) { return generateRandomChars(length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'); }
+function generateRandomPassword(length = 12) { const l = 'abcdefghijklmnopqrstuvwxyz', u = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', n = '0123456789', s = '!@#$%^&*()_+-=[]{};:,.<>?', a = l + u + n + s; let p = ''; p += getRandomItem(l.split('')); p += getRandomItem(u.split('')); p += getRandomItem(n.split('')); p += getRandomItem(s.split('')); for (let i = p.length; i < length; i++) { p += getRandomItem(a.split('')); } return p.split('').sort(() => 0.5 - Math.random()).join(''); }
+function getRandomUSAreaCode() { const r = getRandomItem(usStateAbbreviations); if (usStatesData[r] && usStatesData[r].areaCodes && usStatesData[r].areaCodes.length > 0) { return getRandomItem(usStatesData[r].areaCodes); } return String(Math.floor(Math.random() * 800) + 200); }
+function generatePhoneParts() { return `-${String(Math.floor(Math.random() * 800) + 200).padStart(3, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`; }
+function generateGUID() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8); return v.toString(16); }); }
+function generateEIN() { return `${generateRandomNumbers(2)}-${generateRandomNumbers(7)}`; }
+function generateIBAN() { return `US${generateRandomNumbers(2)}${generateRandomAlphanum(23).toUpperCase()}`; }
+function generateBitcoinAddress() { return getRandomItem(['1', '3']) + generateRandomChars(33, '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'); }
+function generateEthereumAddress() { return '0x' + generateRandomChars(40, '0123456789abcdef'); }
+function generateRippleAddress() { return 'r' + generateRandomChars(34, '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'); }
+function generateMoneroAddress() { return '4' + generateRandomAlphanum(94); }
+
+// --- Generator Functions (with updates for age filter) ---
+function generatePersonalDetails(genderFilter = "", ageRange = "") {
+    let gender = genderFilter || getRandomItem(genders);
+    let name, firstName, lastName;
+    do { firstName = (gender === "male") ? getRandomItem(maleFirstNames) : getRandomItem(femaleFirstNames); lastName = getRandomItem(lastNames); name = `${firstName} ${lastName}`; } while (usedNames.has(name));
+    usedNames.add(name);
+    let dob = generateRandomDOB(ageRange);
+    const height = generateRandomHeight();
+    return {
+        gender: gender,
+        name: name,
+        firstName: firstName,
+        lastName: lastName,
+        dob: dob.formatted,
+        age: dob.age,
+        phone: `(+1) ${getRandomUSAreaCode()}${generatePhoneParts()}`,
+        ssn: generateRandomSSN(),
+        zodiac: getRandomItem(zodiacSigns),
+        hairColor: getRandomItem(hairColors),
+        eyeColor: getRandomItem(eyeColors),
+        bloodType: getRandomItem(bloodTypes),
+        height: height,
+        weight: generateRandomWeight(height),
+        maritalStatus: getRandomItem(maritalStatuses), 
+        hobbies: getRandomItem(hobbies), 
+        education: getRandomItem(educationLevels),
+        university: getRandomItem(universities),
+    };
+}
+
+function generateRandomDOB(ageRange) { const [minAge, maxAge] = ageRange ? ageRange.split('-').map(Number) : [18, 75]; const age = R_NUM(minAge, maxAge); const birthYear = new Date().getFullYear() - age; const dob = new Date(birthYear, R_NUM(0, 11), R_NUM(1, 28)); return { date: dob, formatted: dob.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }), age: age }; }
+function generateRandomSSN() { let p1; do { p1 = Math.floor(Math.random() * 900) + 100; } while (p1 === 666 || (p1 >= 900 && p1 <= 999)); return `${p1}-${String(Math.floor(Math.random() * 90) + 10).padStart(2, '0')}-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`; }
+function generateRandomHeight() { return Math.floor(Math.random() * (195 - 155 + 1)) + 155; }
+function generateRandomWeight(h) { const m = h / 100; const b = (Math.random() * (29.9 - 18.5)) + 18.5; return Math.round(b * m * m); }
+function generateRandomUSAddress() { const r = getRandomItem(usStateAbbreviations), s = usStatesData[r]; if (!s || !s.cities || s.cities.length === 0) return { street: "N/A", city: "N/A", state: "N/A", stateName: "N/A", zip: "N/A" }; const c = getRandomItem(s.cities); const n = s.name; const t = s.timezone; const sn = `${Math.floor(Math.random() * 9999) + 1} ${getRandomItem(streetNames)} ${getRandomItem(streetSuffixes)}`; const ap = Math.random() > 0.65 ? ` ${getRandomItem(["Apt", "Unit", "Ste"])} ${Math.floor(Math.random()*500)+1}` : ''; const z = String(Math.floor(Math.random() * 90000) + 10000); const la = (Math.random() * (49.38 - 24.39) + 24.39).toFixed(6); const lo = (Math.random() * (-66.94 - -124.84) + -124.84).toFixed(6); return { street: sn + ap, city: c, postalCode: z, region: n, country: "United States", timezone: t, latitude: la, longitude: lo, fullAddress: `${sn}${ap}, ${c}, ${r} ${z}` }; }
+function generateFinancialInfo() { const cc = (()=>{ const t = getRandomItem(creditCardTypes); let p = '', l = 16, cv = 3; switch (t) { case "Visa": p = '4'; break; case "MasterCard": p = getRandomItem(['51','52','53','54','55']); break; case "American Express": p = getRandomItem(['34','37']); l=15; cv=4; break; default: p = String(Math.floor(Math.random() * 6) + 3); } let n = p + generateRandomNumbers(l-p.length); return { type: t, number: n.replace(/(\d{4})/g, '$1 ').trim(), cvv: generateRandomNumbers(cv), expiration: `${String(Math.floor(Math.random()*12)+1).padStart(2,'0')}/${String(new Date().getFullYear()+Math.floor(Math.random()*5)+2).slice(-2)}`, bank: getRandomItem(banks) }; })(); return { creditCard: cc, bankAccount: { bank: cc.bank, account: generateRandomNumbers(10), iban: generateIBAN() }, income: Math.floor(Math.random() * 170001) + 30000 }; }
+function generateInternetInfo(f, l) { const u = (()=>{ const fn=f.toLowerCase(), ln=l.toLowerCase().replace(/[^a-z0-9]/gi,''); const patterns = [`${fn.charAt(0)}${ln}${R_NUM(10,999)}`, `${fn}_${ln}`, `${ln}${fn.charAt(0)}${R_NUM(10,99)}`]; return getRandomItem(patterns); })(); return { username: u, email: `${u}@${getRandomItem(emailDomains)}`, safeEmail: `${Math.random().toString(36).substring(2,12)}@${getRandomItem(["gmail.com", "outlook.com"])}`, password: generateRandomPassword(), userAgent: getRandomItem(userAgents), macAddress: Array(6).fill(0).map(()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':').toUpperCase(), ipv4: Array(4).fill(0).map(()=>Math.floor(Math.random()*256)).join('.'), ipv6: Array(8).fill(0).map(()=>Math.floor(Math.random()*65536).toString(16).padStart(4,'0')).join(':'), website: `https://www.${l.toLowerCase()}${f.toLowerCase().charAt(0)}.com` }; }
+function generateCryptoInfo() { return { bitcoin: generateBitcoinAddress(), ethereum: generateEthereumAddress(), ripple: generateRippleAddress(), monero: generateMoneroAddress() }; }
+function generateEmploymentInfo() { const t = getRandomItem(jobTitles); const c = `${getRandomItem(['Global','National','Apex','Summit','United','Dynamic','Synergy','Innovative'])} ${getRandomItem(['Tech','Solutions','Systems','Industries','Group','Partners'])}`; let s = Math.floor(Math.random() * 120000) + 45000; if (t.includes("Manager")||t.includes("Engineer")) { s += 25000; } const ad = generateRandomUSAddress(); return { employmentStatus: getRandomItem(employmentStatuses), title: t, company: c, industry: getRandomItem(industries), yearsExperience: Math.floor(Math.random() * 25) + 1, salary: s, companyAddress: ad.fullAddress, companyPhone: `(+1) ${getRandomUSAreaCode()}${generatePhoneParts()}`, companyEmail: `contact@${c.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s/g,'-')}.com`, companyEin: generateEIN(), companySize: getRandomItem(companySizes) }; }
+function generateOtherInfo() { return { favoriteColor: getRandomItem(colors), vehicle: getRandomItem(vehicles), guid: generateGUID() }; }
+
+// --- Main Person Generation ---
+function generateInitialPerson(genderFilter = "", ageRange = "") {
+    let personalDetails = generatePersonalDetails(genderFilter, ageRange);
+    let internetDetails = generateInternetInfo(personalDetails.firstName, personalDetails.lastName);
+    return {
+        ...personalDetails,
+        username: internetDetails.username,
+        address: generateRandomUSAddress(),
+        finance: generateFinancialInfo(),
+        internet: internetDetails,
+        employment: generateEmploymentInfo(),
+        crypto: generateCryptoInfo(),
+        other: generateOtherInfo(), 
+    };
+}
+
+// --- Display Functions ---
+function appendGridItemToColumn(col, lbl, val, opts = {}) { if (val === undefined || val === null || String(val).trim() === "") val = 'N/A'; const itm = document.createElement('div'); itm.className = 'generator-data-item'; const l = document.createElement('span'); l.className = 'generator-data-label'; l.textContent = lbl; const v = document.createElement('span'); v.className = 'generator-data-value'; if(opts.bulkButton){ const w = document.createElement('div'); w.className = 'value-with-button'; const t = document.createElement('span'); t.className = 'value-text'; t.innerHTML = opts.isLongText?`<small>${String(val)}</small>`:String(val); const b = document.createElement('a'); b.className = 'bulk-gen-btn'; b.href = opts.bulkButton.url; b.textContent = opts.bulkButton.text; b.target = "_blank"; w.appendChild(t); w.appendChild(b); v.appendChild(w); } else { v.innerHTML = opts.isLongText?`<small>${String(val)}</small>`:String(val); } itm.appendChild(l); itm.appendChild(v); col.appendChild(itm); }
+
+function displayPerson(person) {
+    document.getElementById('personImage').src = STATIC_PROFILE_IMAGE_URL;
+    generateQRCode(); 
+
+    const grids = { personal: document.getElementById('personalInfoGrid'), address: document.getElementById('addressInfoGrid'), finance: document.getElementById('financeInfoGrid'), internet: document.getElementById('internetInfoGrid'), crypto: document.getElementById('cryptoInfoGrid'), employment: document.getElementById('employmentInfoGrid'), other: document.getElementById('otherInfoGrid') };
+    for (const key in grids) { if (grids[key]) { grids[key].innerHTML = ''; } }
+    function createCols(grid, count = 2) { const cols = []; for (let i = 0; i < count; i++) { const col = document.createElement('div'); col.className = 'generator-data-column'; grid.appendChild(col); cols.push(col); } return cols; }
+    
+    if (grids.personal && person) {
+        const [col1, col2] = createCols(grids.personal);
+        appendGridItemToColumn(col1, 'Name', `${person.name} (${person.gender.charAt(0).toUpperCase() + person.gender.slice(1)})`);
+        appendGridItemToColumn(col1, 'Date of Birth', `${person.dob} (${person.age} years)`);
+        appendGridItemToColumn(col1, 'Phone', person.phone, { bulkButton: { text: 'Bulk Phones', url: '#' }});
+        appendGridItemToColumn(col1, 'SSN', person.ssn);
+        const hF = Math.floor(person.height / 30.48), hI = Math.round((person.height % 30.48) / 2.54);
+        appendGridItemToColumn(col1, 'Height', `${person.height} cm (${hF}'${hI}")`);
+        appendGridItemToColumn(col1, 'Weight', `${person.weight} kg (${Math.round(person.weight * 2.20462)} lbs)`);
+        appendGridItemToColumn(col1, 'Zodiac Sign', person.zodiac);
+        appendGridItemToColumn(col2, 'Hair Color', person.hairColor);
+        appendGridItemToColumn(col2, 'Eye Color', person.eyeColor);
+        appendGridItemToColumn(col2, 'Blood Type', person.bloodType);
+        appendGridItemToColumn(col2, 'Username', person.username);
+        appendGridItemToColumn(col2, 'Marital Status', person.maritalStatus);
+        appendGridItemToColumn(col2, 'Hobbies', person.hobbies);
+        appendGridItemToColumn(col2, 'Education Level', person.education);
+        appendGridItemToColumn(col2, 'University', person.university);
+    }
+    if (grids.address && person.address) {
+        const [col1, col2] = createCols(grids.address);
+        appendGridItemToColumn(col1, 'Street', person.address.street);
+        appendGridItemToColumn(col1, 'City', person.address.city);
+        appendGridItemToColumn(col1, 'Postal Code', person.address.postalCode);
+        appendGridItemToColumn(col1, 'Region', person.address.region);
+        appendGridItemToColumn(col2, 'Country', person.address.country);
+        appendGridItemToColumn(col2, 'Timezone', person.address.timezone);
+        appendGridItemToColumn(col2, 'Latitude', person.address.latitude);
+        appendGridItemToColumn(col2, 'Longitude', person.address.longitude);
+        appendGridItemToColumn(grids.address.querySelector('.generator-data-column'), 'Full Address', person.address.fullAddress, { isLongText: true });
+    }
+    if (grids.finance && person.finance) {
+        const [col1, col2] = createCols(grids.finance);
+        appendGridItemToColumn(col1, 'Card Type', person.finance.creditCard.type);
+        appendGridItemToColumn(col1, 'Card Number', person.finance.creditCard.number);
+        appendGridItemToColumn(col1, 'CVV', person.finance.creditCard.cvv);
+        appendGridItemToColumn(col1, 'Expiration', person.finance.creditCard.expiration);
+        appendGridItemToColumn(col2, 'Issuing Bank (Card)', person.finance.creditCard.bank);
+        appendGridItemToColumn(col2, 'Bank', person.finance.bankAccount.bank);
+        appendGridItemToColumn(col2, 'Account (Reg./Konto)', person.finance.bankAccount.account);
+        appendGridItemToColumn(col2, 'IBAN', person.finance.bankAccount.iban, { isLongText: true });
+        appendGridItemToColumn(grids.finance.querySelector('.generator-data-column'), 'Est. Annual Income', `$${person.finance.income.toLocaleString()}`);
+    }
+    if (grids.internet && person.internet) {
+        const [col1, col2] = createCols(grids.internet);
+        appendGridItemToColumn(col1, 'Username', person.internet.username);
+        appendGridItemToColumn(col1, 'Email', person.internet.email);
+        appendGridItemToColumn(col1, 'Safe Email', person.internet.safeEmail);
+        appendGridItemToColumn(col1, 'Password', person.internet.password, { bulkButton: { text: 'Bulk Passwords', url: '#' }});
+        appendGridItemToColumn(col2, 'User Agent', person.internet.userAgent, { isLongText: true });
+        appendGridItemToColumn(col2, 'MAC Address', person.internet.macAddress);
+        appendGridItemToColumn(col2, 'IPv4 Address', person.internet.ipv4);
+        appendGridItemToColumn(col2, 'IPv6 Address', person.internet.ipv6, { isLongText: true });
+        appendGridItemToColumn(grids.internet.querySelector('.generator-data-column'), 'Website', person.internet.website);
+    }
+    if (grids.crypto && person.crypto) {
+        const [col1, col2] = createCols(grids.crypto,);
+        appendGridItemToColumn(col1, 'Bitcoin Address', person.crypto.bitcoin, { isLongText: true });
+        appendGridItemToColumn(col1, 'Ethereum Address', person.crypto.ethereum, { isLongText: true });
+        appendGridItemToColumn(col2, 'Ripple Address', person.crypto.ripple, { isLongText: true });
+        appendGridItemToColumn(col2, 'Monero Address', person.crypto.monero, { isLongText: true }); 
+    }
+    if (grids.employment && person.employment) {
+        const [col1, col2] = createCols(grids.employment);
+        const monthlySalary = Math.round(person.employment.salary / 12);
+        appendGridItemToColumn(col1, 'Employment Status', person.employment.employmentStatus);
+        appendGridItemToColumn(col1, 'Job Title', person.employment.title);
+        appendGridItemToColumn(col1, 'Company', person.employment.company);
+        appendGridItemToColumn(col1, 'Industry', person.employment.industry);
+        appendGridItemToColumn(col1, 'Experience', `${person.employment.yearsExperience} years`);
+        appendGridItemToColumn(col1, 'Company EIN', person.employment.companyEin);
+        appendGridItemToColumn(col2, 'Monthly Salary', `$${monthlySalary.toLocaleString()}`);
+        appendGridItemToColumn(col2, 'Est. Salary', `$${person.employment.salary.toLocaleString()}`);
+        appendGridItemToColumn(col2, 'Company Size', person.employment.companySize);
+        appendGridItemToColumn(col2, 'Company Phone', person.employment.companyPhone);
+        appendGridItemToColumn(col2, 'Company Email', person.employment.companyEmail, { isLongText: true });
+        appendGridItemToColumn(grids.employment.querySelector('.generator-data-column'), 'Company Address', person.employment.companyAddress, { isLongText: true });
+    }
+    if (grids.other && person.other) {
+        const [col1, col2] = createCols(grids.other);
+        appendGridItemToColumn(col1, 'Favorite Color', person.other.favoriteColor);
+        appendGridItemToColumn(col1, 'Vehicle', person.other.vehicle);
+        appendGridItemToColumn(col2, 'GUID', person.other.guid, { isLongText: true });
+    }
+}
+
+// --- *** CORRECTED QR Code Generation Function (Non-Clickable) *** ---
+function generateQRCode() {
+    const container = document.getElementById('qrCodeContainer');
+    container.innerHTML = ''; // Clear previous QR code
+    const canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+
+    const QR_CODE_URL = 'Copy and paste your browser: https://fake247.blogspot.com/2025/06/create-realistic-fake-identities-names.html';
+    
+    // Tooltip message updated to remove "click" instruction
+    const QR_CODE_HOVER_MESSAGE = 'Scan to visit fake identity ';
+    
+    container.title = QR_CODE_HOVER_MESSAGE;
+
+    const qrContent = QR_CODE_URL;
+    
+    QRCode.toCanvas(canvas, qrContent, {
+        errorCorrectionLevel: 'M',
+        width: 160,
+        margin: 2,
+        color: {
+            dark: '#2d3436',
+            light: '#FFFFFF'
+        }
+    }, (err) => {
+        if (err) {
+            console.error("QR Code Generation Error:", err);
+            container.innerHTML = 'Error generating QR code.';
+        }
+    }); 
+}
+
+
+// --- Event Handlers ---
+function generateSection(section) {
+    const genderFilter = document.getElementById('genderFilter').value;
+    const ageFilter = document.getElementById('ageFilter').value;
+    if (Object.keys(currentPerson).length === 0) { currentPerson = generateInitialPerson(genderFilter, ageFilter); }
+
+    switch (section) {
+        case 'personal':
+            const newPersonal = generatePersonalDetails(genderFilter, ageFilter);
+            const newInternet = generateInternetInfo(newPersonal.firstName, newPersonal.lastName);
+            currentPerson = { ...currentPerson, ...newPersonal, username: newInternet.username, internet: newInternet };
+            break;
+        case 'address': currentPerson.address = generateRandomUSAddress(); break;
+        case 'finance': currentPerson.finance = generateFinancialInfo(); break;
+        case 'internet': currentPerson.internet = generateInternetInfo(currentPerson.firstName || "User", currentPerson.lastName || "Name"); currentPerson.username = currentPerson.internet.username; break;
+        case 'crypto': currentPerson.crypto = generateCryptoInfo(); break;
+        case 'employment': currentPerson.employment = generateEmploymentInfo(); break;
+        case 'other': currentPerson.other = generateOtherInfo(); break;
+    }
+    displayPerson(currentPerson);
+}
+
+function applyFilters() {
+    const genderFilter = document.getElementById('genderFilter').value;
+    const ageFilter = document.getElementById('ageFilter').value;
+    currentPerson = generateInitialPerson(genderFilter, ageFilter);
+    displayPerson(currentPerson);
+}
+
+function handleLocationRedirect() { const s = document.getElementById('locationFilter'); const u = s.value; if (u && u !== "" && u !== "your-link-for-united-states-tool") { window.location.href = u; } }
+
+// --- Initial Load ---
+window.addEventListener('load', function() {
+    applyFilters();
+});
+</script>
